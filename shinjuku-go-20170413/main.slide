@@ -1,0 +1,91 @@
+Go でリアルタイムゲームサーバーを作っている話
+13 Apr 2017
+Tags: golang, game
+
+岩野 尚吾 (IWANO Shogo)
+shiwano@gmail.com
+https://github.com/shiwano
+https://twitter.com/shiwano
+
+* この LT でやること・話すこと
+- 作ってるゲームの紹介
+- サーバー構成
+- バトルサーバーの各実装の概略
+
+* どんなゲーム？
+
+.image images/game.gif 580 _
+
+* ざっくり言うと
+- 潜水艦がドンパチするゲーム
+- オンラインマルチプレイ対戦
+- その他機能は…（ユーザーの成長要素とかやりたいことはあるけれど）
+
+* サーバーでやること
+- ユーザー認証
+- プレイデータの同期・永続化
+- マッチング
+- リアルタイムバトル
+
+* サーバー構成（予定）
+
+.image images/servers.png _ 1000
+
+* バトルサーバーの仕事
+- クライアントとの双方向通信
+- API サーバーとの連携
+- ルーム単位でのバトルの実行
+
+* バトルのシーケンス図
+
+.image images/squence.png 580 _
+
+* 現在実装中のバトルのクラス図
+
+.image images/class.png 580 _
+
+* 通信定義
+[[https://github.com/shiwano/typhen][typhen]] という自作ツールで、TypeScript の型定義ファイルから Go, C#, Ruby のコードを自動生成している。
+
+以下、通信定義の例。
+.code def.d.ts
+
+* 通信定義
+生成されるコードの例（Go の場合）。
+.code gen.go
+
+* 通信定義
+生成されるコードの例（C# の場合）。
+.code gen.cs
+
+* 通信定義
+生成されるコードの例（Ruby の場合）。
+.code gen.rb
+
+* 通信まわりの実装
+クライアントとは、[[https://github.com/shiwano/websocket-conn][websocket-conn]] という自作のラッパーライブラリを使って、WebSocket で通信している。
+
+こんな感じでコネクションのハンドリングができる。
+.code conn.go
+
+* 経路探索・衝突判定・視界
+経路探索・衝突判定・視界まわりのバトルのロジックは全部 Go 側で実装していて、クライアントは一切ロジックを持たないようにしている。
+
+以下のようなデバッグウィンドウも開発中は表示できる。
+.image images/map.gif
+
+* 
+.image images/gopher.png 480 _
+.caption By Olga Shalakhina and Renee French.
+
+* 自爆機能追加の流れ
+- 自爆リクエストの通信定義を TypeScript の型定義ファイルに追加
+- コード自動生成
+- クライアントで何か適当なボタンを押したら、バトルサーバーに自爆リクエストを送るようにする
+- バトルサーバーで自爆リクエストを送ってきたプレイヤーがいたら、そのプレイヤーの潜水艦を破壊する
+
+* ライブコーディング
+
+* 最後に
+ここで紹介しているゲームのコードを公開しているリポジトリの URL
+.link https://github.com/shiwano/submarine
